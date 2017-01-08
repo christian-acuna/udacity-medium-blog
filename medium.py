@@ -1,6 +1,7 @@
 import os
 import webapp2
 import jinja2
+import re
 
 from google.appengine.ext import db
 
@@ -40,14 +41,15 @@ class NewPost(Handler):
         if subject and content:
             a = Post(subject = subject, content = content)
             a.put() #store in database
-            self.redirect('/blog')
+            id = a.key().id()
+            self.redirect('/blog/' + str(id) )
         else:
             error = 'A post needs both a subject line and content'
             self.render_form(subject, content, error)
 
 
 class MainPage(Handler):
-    def render_front(self, subject="", content="", error=""):
+    def render_front(self):
         posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
 
         self.render("front.html", posts = posts)
@@ -55,4 +57,13 @@ class MainPage(Handler):
     def get(self):
         self.render_front()
 
-app = webapp2.WSGIApplication([('/blog', MainPage), ('/blog/newpost', NewPost)], debug=True)
+class PostHandler(Handler):
+    def render_post(self, post_id):
+        post = Post.get_by_id(int(post_id))
+
+        self.render("post.html", post = [post])
+
+    def get(self, post_id):
+        self.render_post(post_id)
+
+app = webapp2.WSGIApplication([('/blog', MainPage), ('/blog/newpost', NewPost), (r'/blog/(\d+)', PostHandler)], debug=True)

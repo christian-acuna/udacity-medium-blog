@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome to Blog</h1>
-<div class="ui four cards">
+<div class="ui two cards">
   {%for post in posts %}
-  <a class="ui card" href="http://www.dog.com">
+  <a class="ui card" href="blog/{{post.key().id()}}">
     <div class="content">
       <div class="header">{{post.subject}}</div>
       <div class="description">
-        <p>{{post.content}}</p>
+        <p>{{post.content}} {{post.key().id()}}</p>
       </div>
     </div>
   </a>
