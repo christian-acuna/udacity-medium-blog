@@ -32,6 +32,9 @@ class Post(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
+
+
+
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -43,6 +46,9 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+class HomeHandler(Handler):
+    def get(self):
+        self.render("home.html")
 
 class MainPage(Handler):
     def render_front(self, visits):
@@ -100,4 +106,4 @@ class PostHandler(Handler):
     def get(self, post_id):
         self.render_post(post_id)
 
-app = webapp2.WSGIApplication([('/blog/?', MainPage), ('/blog/newpost', NewPost), (r'/blog/(\d+)', PostHandler)], debug=True)
+app = webapp2.WSGIApplication([('/', HomeHandler), ('/blog/?', MainPage), ('/blog/newpost', NewPost), (r'/blog/(\d+)', PostHandler)], debug=True)
