@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Welcome to Blog</h1>
-<hr>
-<ul>
+<h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome to Blog</h1>
+<div class="ui four cards">
   {%for post in posts %}
-  <li>{{post.subject}}</li>
+  <a class="ui card" href="http://www.dog.com">
+    <div class="content">
+      <div class="header">{{post.subject}}</div>
+      <div class="description">
+        <p>{{post.content}}</p>
+      </div>
+    </div>
+  </a>
   {% endfor %}
-</ul>
-
+</div>
+<br>
 <div class="ui animated button" tabindex="0">
   <div class="visible content">New Post</div>
   <div class="hidden content">
