@@ -2,4 +2,16 @@
 {% block content %}
 <h1>Welcome to Blog</h1>
 <hr>
+<ul>
+  {%for post in posts %}
+  <li>{{post.subject}}</li>
+  {% endfor %}
+</ul>
+
+<div class="ui animated button" tabindex="0">
+  <div class="visible content">New Post</div>
+  <div class="hidden content">
+    <a href="/blog/newpost"><i class="right plus icon"></i></a>
+  </div>
+</div>
 {%endblock%}

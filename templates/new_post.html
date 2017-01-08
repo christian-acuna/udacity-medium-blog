@@ -4,18 +4,20 @@
   <h1>New Post</h1>
   <div class="field">
     <label>Subject</label>
-    <input type="text" name="first-name" placeholder="First Name">
+    <input type="text" name="subject">
   </div>
   <div class="field">
-    <label>Last Name</label>
-    <input type="text" name="last-name" placeholder="Last Name">
-  </div>
-  <div class="field">
-    <div class="ui checkbox">
-      <input type="checkbox" tabindex="0" class="hidden">
-      <label>I agree to the Terms and Conditions</label>
-    </div>
+    <label>Post Content</label>
+    <textarea name="content"></textarea>
   </div>
   <button class="ui button" type="submit">Submit</button>
 </form>
+{% if error %}
+  <div class="ui error message">
+    <div class="header">There was an error submitting your post</div>
+    <ul>
+      <li>{{error}}</li>
+    </ul>
+  </div>
+{% endif%}
 {%endblock%}

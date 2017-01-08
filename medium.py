@@ -25,48 +25,34 @@ class Post(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
 
 class NewPost(Handler):
-    def render_front(self, subject="", content="", error=""):
+    def render_form(self, subject="", content="", error=""):
         posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
 
         self.render("new_post.html", subject=subject, content=content, error=error, posts = posts)
 
     def get(self):
-        self.render_front()
+        self.render_form()
 
     def post(self):
         subject = self.request.get('subject')
         content = self.request.get('content')
 
-        if title and art:
-            a = Post(subject = title, contest = art)
+        if subject and content:
+            a = Post(subject = subject, content = content)
             a.put() #store in database
             self.redirect('/blog')
-
         else:
-            error = 'we need both a subject line and some content!'
-            self.render_front(subject, content, error)
+            error = 'A post needs both a subject line and content'
+            self.render_form(subject, content, error)
 
 
 class MainPage(Handler):
     def render_front(self, subject="", content="", error=""):
         posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
 
-        self.render("front.html", subject=subject, content=content, error=error, posts = posts)
+        self.render("front.html", posts = posts)
 
     def get(self):
         self.render_front()
-
-    def post(self):
-        subject = self.request.get('subject')
-        content = self.request.get('content')
-
-        if title and art:
-            a = Post(subject = title, contest = art)
-            a.put() #store in database
-            self.redirect('/blog')
-
-        else:
-            error = 'we need both a subject line and some content!'
-            self.render_front(subject, content, error)
 
 app = webapp2.WSGIApplication([('/blog', MainPage), ('/blog/newpost', NewPost)], debug=True)
