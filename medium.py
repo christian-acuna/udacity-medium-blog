@@ -105,5 +105,14 @@ class PostHandler(Handler):
 
     def get(self, post_id):
         self.render_post(post_id)
+class LoginHandler(Handler):
+    def get(self):
+        self.render("login.html")
 
-app = webapp2.WSGIApplication([('/', HomeHandler), ('/blog/?', MainPage), ('/blog/newpost', NewPost), (r'/blog/(\d+)', PostHandler)], debug=True)
+
+
+app = webapp2.WSGIApplication([('/', HomeHandler),
+                              ('/blog/?', MainPage),
+                              ('/blog/newpost', NewPost),
+                              (r'/blog/(\d+)', PostHandler),
+                              ('/login', LoginHandler)], debug=True)
