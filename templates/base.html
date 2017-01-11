@@ -13,6 +13,26 @@
   <title>Medium Blog</title>
 </head>
 <body>
+  <div class="ui stackable menu">
+  <div class="item">
+    <h3><a href="/blog">Blog</a></h3>
+  </div>
+
+  {% if user.username %}
+    <a class="item" href="/welcome">User Account</a>
+    <a class="item" href="/logout">Logout</a>
+  {% else %}
+    <a class="item" href="/signup">Sign Up</a>
+    <a class="item" href="/login">Login</a>
+  {% endif %}
+    <!-- <a class="item" href="/users">Profile</a> -->
+  <!-- <% else %>
+    <a class="item" href="/users/new">Register</a>
+    <div class="right menu">
+      <a class="item" href="/sessions/new">Sign In</a>
+    </div>
+  <% end %> -->
+</div>
   <div class="ui main text container">
     {% block content %}
     {% endblock %}

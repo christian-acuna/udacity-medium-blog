@@ -103,13 +103,17 @@ class User(db.Model):
 ####### Handler #########
 #######################
 
+def render_str(template, **params):
+    t = jinja_env.get_template(template)
+    return t.render(params)
+
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        t = jinja_env.get_template(template)
-        return t.render(params)
+        params['user'] = self.user
+        return render_str(template, **params)
 
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
@@ -156,7 +160,7 @@ class HomeHandler(Handler):
 class MainPage(Handler):
     def render_front(self, visits):
         posts = Post.all().order('-created')
-        self.render("front.html", posts = posts, visits = visits)
+        self.render("posts.html", posts = posts, visits = visits)
 
     def get(self):
         visits = 0
