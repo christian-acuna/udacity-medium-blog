@@ -109,10 +109,28 @@ class LoginHandler(Handler):
     def get(self):
         self.render("login.html")
 
+class RegisterHandler(Handler):
+    def get(self):
+        self.render("register.html")
+
+
+    def post(self):
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if subject and content:
+            a = Post(subject = subject, content = content)
+            a.put() #store in database
+            id = a.key().id()
+            self.redirect('/blog/' + str(id) )
+        else:
+            error = 'A post needs both a subject line and content'
+            self.render_form(subject=subject, content=content, error=error)
 
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
                               ('/blog/newpost', NewPost),
                               (r'/blog/(\d+)', PostHandler),
-                              ('/login', LoginHandler)], debug=True)
+                              ('/login', LoginHandler),
+                              ('/register', RegisterHandler)], debug=True)
