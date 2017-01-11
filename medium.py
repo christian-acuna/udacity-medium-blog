@@ -115,17 +115,24 @@ class RegisterHandler(Handler):
 
 
     def post(self):
-        subject = self.request.get('subject')
-        content = self.request.get('content')
+        username = self.request.get('username')
+        password = self.request.get('password')
+        password_confirmation = self.request.get('password_confirmation')
+        email = self.request.get('email')
 
-        if subject and content:
-            a = Post(subject = subject, content = content)
-            a.put() #store in database
-            id = a.key().id()
-            self.redirect('/blog/' + str(id) )
+        if password == password_confirmation:
+
+            if subject and content:
+                a = Post(subject = subject, content = content)
+                a.put() #store in database
+                id = a.key().id()
+                self.redirect('/blog/' + str(id) )
+            else:
+                error = 'A post needs both a subject line and content'
+                self.render_form(subject=subject, content=content, error=error)
         else:
-            error = 'A post needs both a subject line and content'
-            self.render_form(subject=subject, content=content, error=error)
+            error = 'Passwords do not match'
+            self.render("register.html", username=username, email=email, error=error)
 
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
