@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome to Blog</h1>
+<h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Blog</h1>
 <div class="ui two cards">
   {%for post in posts %}
   <a class="ui card" href="blog/{{post.key().id()}}">
@@ -12,7 +12,7 @@
     </div>
   </a>
   {% endfor %}
-</div>
+</div>login
 <br>
 <div class="ui animated button" tabindex="0">
   <div class="visible content">New Post</div>
