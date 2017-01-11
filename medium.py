@@ -76,22 +76,26 @@ class User(db.Model):
     @classmethod
     #cls refers to the class User
     def by_id(cls, uid):
-        return User.get_by_id(uid)
+        return cls.get_by_id(uid)
     # looks up a user by name
     @classmethod
     def by_username(cls, username):
-        user = User.all().filter('username =', username).get()
+        user = cls.all().filter('username =', username).get()
         return user
     # creates the user, but does not actually store it
     @classmethod
     def register(cls, username, pw, email = None):
         pw_hash = make_pw_hash(username, pw)
-        return User(username = username,
+        return cls(username = username,
                     password_hash = pw_hash,
                     email = email)
+
     @classmethod
     def login(cls, username, password):
+        # find user object by username
         user = cls.by_username(username)
+        # if user exists and valid password
+        # return user
         if user and vald_pw(username, password, user.password_hash):
             return user
 
@@ -110,20 +114,28 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
+        # set cookie on Path to make sure cookies don't get set on
+        # different paths
         self.response.headers.add_header(
         'Set-Cookie',
         '%s=%s; Path=/' % (name, cookie_val))
+
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
+
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
+
+    # sets the cookie to nothing
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
     #called by the app engine framework
+    # every request calls this function
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
@@ -210,38 +222,6 @@ class PostHandler(Handler):
 ##########################
 
 
-##########################
-####### Login  ##########
-##########################
-class LoginHandler(Handler):
-    def get(self):
-        self.render("login.html")
-
-    def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-
-
-        if username:
-            c = db.execute("SELECT * FROM USER WHERE username = %s" % username)
-            print c.fetchone()
-            # password_hash = hash_str(password)
-            # a = User(username = username, password_hash = password_hash, email = email)
-            # a.put() #store in database
-            # id = a.key().id()
-            #
-            # new_cookie_val = make_secure_val(str(id))
-            # self.response.headers.add_header('Set-Cookie', 'user_id=%s' % new_cookie_val)
-            # self.redirect('/welcome')
-
-        else:
-            error = 'Username not vaild. Please try again'
-            self.render_form(username=username, email=email, error=error)
-        # else:
-        #     error = 'Passwords do not match'
-        #     self.render("register.html", username=username, email=email, error=error)
-
-
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and USER_RE.match(username)
@@ -310,6 +290,31 @@ class WelcomeHandler(Handler):
         else:
             self.redirect('/signup')
 
+##########################
+####### Login  ##########
+##########################
+class LoginHandler(Handler):
+    def get(self):
+        self.render("login.html")
+
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+
+        user = User.login(username, password)
+
+        if user:
+            self.login(user)
+            self.redirect('/welcome')
+        else:
+            message = 'Invaild login. Please try again.'
+            self.render('login.html', error = message)
+
+class LogoutHandler(Handler):
+    def get(self):
+        # calls logout method located in Handler
+        self.logout()
+        self.redirect('/signup')
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
@@ -317,4 +322,5 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               (r'/blog/(\d+)', PostHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
+                              ('/logout', LogoutHandler),
                               ('/welcome', WelcomeHandler)], debug=True)
