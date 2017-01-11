@@ -33,6 +33,12 @@ class Post(db.Model):
     last_modified = db.DateTimeProperty(auto_now = True)
 
 
+class User(db.Model):
+    username = db.StringProperty(required = True)
+    email = db.TextProperty()
+    password_hash = db.StringProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
 
 
 class Handler(webapp2.RequestHandler):
@@ -105,9 +111,23 @@ class PostHandler(Handler):
 
     def get(self, post_id):
         self.render_post(post_id)
+
 class LoginHandler(Handler):
     def get(self):
         self.render("login.html")
+
+class WelcomeHandler(Handler):
+    def get(self):
+        logged_in_cookie = self.request.cookies.get('user_id')
+        if logged_in_cookie:
+            user_id = check_secure_val(logged_in_cookie)
+            if user_id:
+                key = db.Key.from_path('User', int(user_id))
+                user = db.get(key)
+                self.render("welcome.html", user = user)
+        else:
+            self.render("login.html")
+
 
 class RegisterHandler(Handler):
     def get(self):
@@ -122,14 +142,19 @@ class RegisterHandler(Handler):
 
         if password == password_confirmation:
 
-            if subject and content:
-                a = Post(subject = subject, content = content)
+            if username:
+                password_hash = hash_str(password)
+                a = User(username = username, password_hash = password_hash, email = email)
                 a.put() #store in database
                 id = a.key().id()
-                self.redirect('/blog/' + str(id) )
+
+                new_cookie_val = make_secure_val(str(id))
+                self.response.headers.add_header('Set-Cookie', 'user_id=%s' % new_cookie_val)
+                self.redirect('/welcome')
+
             else:
-                error = 'A post needs both a subject line and content'
-                self.render_form(subject=subject, content=content, error=error)
+                error = 'Username not vaild. Please try again'
+                self.render_form(username=username, email=email, error=error)
         else:
             error = 'Passwords do not match'
             self.render("register.html", username=username, email=email, error=error)
@@ -140,4 +165,5 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/newpost', NewPost),
                               (r'/blog/(\d+)', PostHandler),
                               ('/login', LoginHandler),
-                              ('/register', RegisterHandler)], debug=True)
+                              ('/register', RegisterHandler),
+                              ('/welcome', WelcomeHandler)], debug=True)
