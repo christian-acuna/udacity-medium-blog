@@ -3,14 +3,26 @@
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Blog</h1>
 <div class="ui two cards">
   {%for post in posts %}
-  <a class="ui card" href="blog/{{post.key().id()}}">
+  <div class="ui card">
     <div class="content">
-      <div class="header">{{post.subject}}</div>
+      <img class="ui avatar image" src="https://robohash.org/{{post.author}}">{{post.author}}
+    </div>
+    <div class="content">
+      <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
       <div class="description">
         <p>{{post.content}}</p>
       </div>
     </div>
-  </a>
+    <div class="content">
+      <span class="right floated">
+        <i class="heart outline like icon"></i>
+        17 likes
+      </span>
+      <i class="comment icon"></i>
+      3 comments
+    </div>
+  </div>
+
   {% endfor %}
 </div>
 <br>

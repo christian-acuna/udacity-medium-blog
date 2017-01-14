@@ -7,6 +7,7 @@ import re
 import hashlib
 import hmac
 from google.appengine.ext import db
+import datetime
 
 #######################
 ####### Cookies #########
@@ -169,7 +170,8 @@ class MainPage(Handler):
     """Class that handles showing all the blog posts on the /blog route"""
     def render_front(self, visits):
         posts = Post.all().order('-created')
-        self.render("posts.html", posts = posts, visits = visits)
+
+        self.render("posts.html", posts = posts)
 
     def get(self):
         visits = 0
@@ -203,12 +205,14 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get('subject')
         content = self.request.get('content')
+        author = self.user.username
+        likes = 0
 
         if subject and content:
-            a = Post(subject = subject, content = content)
-            a.put() #store in database
-            id = a.key().id()
-            self.redirect('/blog/' + str(id) )
+            post = Post(subject = subject, content = content, author = author, likes = likes)
+            post.put() #store in database
+            id = post.key().id()
+            self.redirect("/blog/posts/%s" % str(id) )
         else:
             error = 'A post needs both a subject line and content'
             self.render_form(subject=subject, content=content, error=error)
@@ -228,6 +232,7 @@ class PostHandler(Handler):
             return
 
         # post = Post.get_by_id(int(post_id))
+
         self.render("post.html", post = post)
 
     def get(self, post_id):
@@ -335,7 +340,7 @@ class LogoutHandler(Handler):
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
                               ('/blog/posts/new', NewPost),
-                              (r'/blog/(\d+)', PostHandler),
+                              (r'/blog/posts/(\d+)', PostHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),
