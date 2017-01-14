@@ -2,4 +2,7 @@
 {% block content %}
   <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">{{post.subject}}</h1>
   <p>{{post.content}}</p>
+  {% if user.username %}
+    <a href="/blog/posts/{{post.key().id()}}/edit">Edit post</a>
+  {% endif %}
 {%endblock%}

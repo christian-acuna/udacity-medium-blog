@@ -40,8 +40,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 ####### Post #########
 #######################
 #######################
-#######################
-#######################
+
 class Post(db.Model):
     """Class for blog post"""
     subject = db.StringProperty(required = True)
@@ -111,6 +110,8 @@ class User(db.Model):
 ####### Handler #########
 #######################
 
+# global render_str function that does not inherit from class Handler
+
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
@@ -121,6 +122,8 @@ class Handler(webapp2.RequestHandler):
 
     def render_str(self, template, **params):
         params['user'] = self.user
+        # calls global render_str with user as key in params so it is
+        # available in each template
         return render_str(template, **params)
 
     def render(self, template, **kw):
@@ -221,15 +224,15 @@ class NewPost(Handler):
 ####### VIEW POST HANDELR #######
 #################################
 
-
 class PostHandler(Handler):
+    """Class that handels the rendering of a single post"""
     def render_post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
         if not post:
             self.error(404)
-            return
+            return self.render("404.html")
 
         # post = Post.get_by_id(int(post_id))
 
@@ -237,6 +240,47 @@ class PostHandler(Handler):
 
     def get(self, post_id):
         self.render_post(post_id)
+
+#################################
+####### EDIT POST HANDELR #######
+#################################
+
+class EditPostHandler(Handler):
+    """Class that handels the editing of a single post"""
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return self.render("404.html")
+
+        if self.user.username == post.author:
+            self.render("edit_post.html", post = post, subject = post.subject, content = post.content)
+        else:
+            error = "You need to be logged in to edit a post!"
+            return self.render('login.html', error = error)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if self.user and self.user.username == post.author:
+            if subject and content:
+                post.subject = subject
+                post.content = content
+                post.put() #store in database
+                self.redirect("/blog/posts/%s" % str(post.key().id()))
+            else:
+                error = 'A post needs both a subject line and content'
+                self.render_form(subject=subject, content=content, error=error)
+        else:
+            error = "You need to be logged in to edit a post!"
+            return self.render('login.html', error = error)
+
 
 ##########################
 ####### USER AUTH ########
@@ -341,6 +385,7 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
                               ('/blog/posts/new', NewPost),
                               (r'/blog/posts/(\d+)', PostHandler),
+                              (r'/blog/posts/(\d+)/edit', EditPostHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),
