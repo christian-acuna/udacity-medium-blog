@@ -11,6 +11,7 @@ from google.appengine.ext import db
 #######################
 ####### Cookies #########
 #######################
+
 SECRET = '8389c4927f7bbdbf7385da1072b7d01b3bd59be32a1e038b'
 def hash_str(s):
     return hmac.new(SECRET, s).hexdigest()
@@ -38,9 +39,15 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 ####### Post #########
 #######################
 #######################
+#######################
+#######################
 class Post(db.Model):
+    """Class for blog post"""
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
+    author = db.StringProperty(required = True)
+    likes = db.IntegerProperty()
+    likers = db.StringListProperty()
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
@@ -150,6 +157,7 @@ class Handler(webapp2.RequestHandler):
 ##########################
 
 class HomeHandler(Handler):
+    """Class that renders the root home page"""
     def get(self):
         self.render("home.html")
 
@@ -158,6 +166,7 @@ class HomeHandler(Handler):
 ##############################
 
 class MainPage(Handler):
+    """Class that handles showing all the blog posts on the /blog route"""
     def render_front(self, visits):
         posts = Post.all().order('-created')
         self.render("posts.html", posts = posts, visits = visits)
@@ -180,10 +189,13 @@ class MainPage(Handler):
 ##########################
 
 class NewPost(Handler):
+    """Class that is responsible for showing a new post form and creating a new post in  the database"""
     def render_form(self, subject="", content="", error=""):
-        posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
-
-        self.render("new_post.html", subject=subject, content=content, error=error, posts = posts)
+        if self.user:
+            self.render("new_post.html", subject=subject, content=content, error=error)
+        else:
+            error = "Only logged in users can write a post. Please log in."
+            self.render("login.html", error = error)
 
     def get(self):
         self.render_form()
@@ -322,7 +334,7 @@ class LogoutHandler(Handler):
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
-                              ('/blog/newpost', NewPost),
+                              ('/blog/posts/new', NewPost),
                               (r'/blog/(\d+)', PostHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
