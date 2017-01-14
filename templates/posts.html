@@ -1,16 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+{% if message %}
+  <div class="ui success message">
+    <div class="header">
+      {{message}}
+    </div>
+  </div>
+{% endif %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Blog</h1>
 <div class="ui two cards">
   {%for post in posts %}
-  <a class="ui card" href="blog/{{post.key().id()}}">
+  <div class="ui card">
     <div class="content">
-      <div class="header">{{post.subject}}</div>
+      <img class="ui avatar image" src="https://robohash.org/{{post.author}}">{{post.author}}
+    </div>
+    <div class="content">
+      <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
       <div class="description">
         <p>{{post.content}}</p>
       </div>
     </div>
-  </a>
+    <div class="content">
+      <span class="right floated like-button">
+        <i data-postid={{post.key().id()}} class="heart outline like icon"></i>
+        <span class="likes-text">{{post.likes}} likes</span>
+
+      </span>
+      <i class="comment icon"></i>
+      3 comments
+    </div>
+  </div>
+
   {% endfor %}
 </div>
 <br>
@@ -18,7 +38,7 @@
 <div class="ui animated button" tabindex="0">
   <div class="visible content">New Post</div>
   <div class="hidden content">
-    <a href="/blog/newpost"><i class="right plus icon"></i></a>
+    <a href="/blog/posts/new"><i class="right plus icon"></i></a>
   </div>
 </div>
   {% endif %}

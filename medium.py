@@ -7,10 +7,13 @@ import re
 import hashlib
 import hmac
 from google.appengine.ext import db
+import datetime
+import json
 
 #######################
 ####### Cookies #########
 #######################
+
 SECRET = '8389c4927f7bbdbf7385da1072b7d01b3bd59be32a1e038b'
 def hash_str(s):
     return hmac.new(SECRET, s).hexdigest()
@@ -38,9 +41,14 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 ####### Post #########
 #######################
 #######################
+
 class Post(db.Model):
+    """Class for blog post"""
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
+    author = db.StringProperty(required = True)
+    likes = db.IntegerProperty()
+    likers = db.StringListProperty()
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
@@ -103,6 +111,8 @@ class User(db.Model):
 ####### Handler #########
 #######################
 
+# global render_str function that does not inherit from class Handler
+
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
@@ -113,6 +123,8 @@ class Handler(webapp2.RequestHandler):
 
     def render_str(self, template, **params):
         params['user'] = self.user
+        # calls global render_str with user as key in params so it is
+        # available in each template
         return render_str(template, **params)
 
     def render(self, template, **kw):
@@ -150,6 +162,7 @@ class Handler(webapp2.RequestHandler):
 ##########################
 
 class HomeHandler(Handler):
+    """Class that renders the root home page"""
     def get(self):
         self.render("home.html")
 
@@ -158,9 +171,11 @@ class HomeHandler(Handler):
 ##############################
 
 class MainPage(Handler):
+    """Class that handles showing all the blog posts on the /blog route"""
     def render_front(self, visits):
         posts = Post.all().order('-created')
-        self.render("posts.html", posts = posts, visits = visits)
+
+        self.render("posts.html", posts = posts)
 
     def get(self):
         visits = 0
@@ -180,10 +195,13 @@ class MainPage(Handler):
 ##########################
 
 class NewPost(Handler):
+    """Class that is responsible for showing a new post form and creating a new post in  the database"""
     def render_form(self, subject="", content="", error=""):
-        posts = db.GqlQuery("SELECT * FROM Post ORDER BY created DESC")
-
-        self.render("new_post.html", subject=subject, content=content, error=error, posts = posts)
+        if self.user:
+            self.render("new_post.html", subject=subject, content=content, error=error)
+        else:
+            error = "Only logged in users can write a post. Please log in."
+            self.render("login.html", error = error)
 
     def get(self):
         self.render_form()
@@ -191,12 +209,14 @@ class NewPost(Handler):
     def post(self):
         subject = self.request.get('subject')
         content = self.request.get('content')
+        author = self.user.username
+        likes = 0
 
         if subject and content:
-            a = Post(subject = subject, content = content)
-            a.put() #store in database
-            id = a.key().id()
-            self.redirect('/blog/' + str(id) )
+            post = Post(subject = subject, content = content, author = author, likes = likes)
+            post.put() #store in database
+            id = post.key().id()
+            self.redirect("/blog/posts/%s" % str(id) )
         else:
             error = 'A post needs both a subject line and content'
             self.render_form(subject=subject, content=content, error=error)
@@ -205,21 +225,108 @@ class NewPost(Handler):
 ####### VIEW POST HANDELR #######
 #################################
 
-
 class PostHandler(Handler):
+    """Class that handels the rendering of a single post"""
     def render_post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
         if not post:
             self.error(404)
-            return
+            return self.render("404.html")
 
         # post = Post.get_by_id(int(post_id))
+
         self.render("post.html", post = post)
 
     def get(self, post_id):
         self.render_post(post_id)
+
+#################################
+####### EDIT POST HANDELR #######
+#################################
+
+class EditPostHandler(Handler):
+    """Class that handles the editing of a single post"""
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return self.render("404.html")
+
+        if self.user.username == post.author:
+            self.render("edit_post.html", post = post, subject = post.subject, content = post.content)
+        else:
+            error = "You need to be logged in to edit a post!"
+            return self.render('login.html', error = error)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if self.user and self.user.username == post.author:
+            if subject and content:
+                post.subject = subject
+                post.content = content
+                post.put() #store in database
+                self.redirect("/blog/posts/%s" % str(post.key().id()))
+            else:
+                error = 'A post needs both a subject line and content'
+                self.render_form(subject=subject, content=content, error=error)
+        else:
+            error = "You need to be logged in to edit a post!"
+            return self.render('login.html', error = error)
+
+#################################
+####### EDIT POST HANDELR #######
+#################################
+
+class DeletePostHandler(Handler):
+    """Class that deletes a post"""
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if self.user.username == post.author:
+            post.delete()
+            message = "Your post has been deleted"
+            self.render("posts.html", message = message)
+        else:
+            error = "You need to be logged in to delete a post!"
+            return self.render('login.html', error = error)
+
+##########################
+####### LIKES  ##########
+##########################
+
+class LikesHandler(Handler):
+    """Class that is responsible for adding a like to a post"""
+    def post(self):
+        post_id = int(self.request.get('postID'))
+        post = Post.get_by_id(post_id)
+        # uid = self.user.key.id()
+        #
+        # if uid == post.author
+
+        post.likes = post.likes + 1
+        post.likers.append(self.user.username)
+
+        if self.user:
+            if self.user.username != post.author:
+                post.put()
+                self.write(json.dumps(({'likes': post.likes})))
+            else:
+                self.redirect("/blog")
+        else:
+            error = "You need to be logged in to like a post!"
+            return self.render('login.html', error = error)
+
+
 
 ##########################
 ####### USER AUTH ########
@@ -268,6 +375,7 @@ class Signup(Handler):
 
     def done(self, *a, **kw):
         raise NotImplementedError
+
 class RegisterHandler(Signup):
     def done(self):
         user = User.by_username(self.username)
@@ -322,8 +430,11 @@ class LogoutHandler(Handler):
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
-                              ('/blog/newpost', NewPost),
-                              (r'/blog/(\d+)', PostHandler),
+                              ('/blog/posts/new', NewPost),
+                              (r'/blog/posts/(\d+)', PostHandler),
+                              (r'/blog/posts/(\d+)/edit', EditPostHandler),
+                              (r'/blog/posts/(\d+)/delete', DeletePostHandler),
+                               (r'/blog/posts/like', LikesHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),
