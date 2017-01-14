@@ -3,6 +3,7 @@
   <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">{{post.subject}}</h1>
   <p>{{post.content}}</p>
   {% if user.username %}
-    <a href="/blog/posts/{{post.key().id()}}/edit">Edit post</a>
+    <a href="/blog/posts/{{post.key().id()}}/edit">Edit</a> |
+    <a href="/blog/posts/{{post.key().id()}}/delete">Delete</a>
   {% endif %}
 {%endblock%}

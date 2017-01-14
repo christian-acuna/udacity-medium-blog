@@ -246,7 +246,7 @@ class PostHandler(Handler):
 #################################
 
 class EditPostHandler(Handler):
-    """Class that handels the editing of a single post"""
+    """Class that handles the editing of a single post"""
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
@@ -281,6 +281,23 @@ class EditPostHandler(Handler):
             error = "You need to be logged in to edit a post!"
             return self.render('login.html', error = error)
 
+#################################
+####### EDIT POST HANDELR #######
+#################################
+
+class DeletePostHandler(Handler):
+    """Class that deletes a post"""
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id))
+        post = db.get(key)
+
+        if self.user.username == post.author:
+            post.delete()
+            message = "Your post has been deleted"
+            self.render("posts.html", message = message)
+        else:
+            error = "You need to be logged in to delete a post!"
+            return self.render('login.html', error = error)
 
 ##########################
 ####### USER AUTH ########
@@ -329,6 +346,7 @@ class Signup(Handler):
 
     def done(self, *a, **kw):
         raise NotImplementedError
+
 class RegisterHandler(Signup):
     def done(self):
         user = User.by_username(self.username)
@@ -386,6 +404,7 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/posts/new', NewPost),
                               (r'/blog/posts/(\d+)', PostHandler),
                               (r'/blog/posts/(\d+)/edit', EditPostHandler),
+                              (r'/blog/posts/(\d+)/delete', DeletePostHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),

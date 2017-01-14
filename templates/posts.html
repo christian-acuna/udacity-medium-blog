@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+{% if message %}
+  <div class="ui success message">
+    <div class="header">
+      {{message}}
+    </div>
+  </div>
+{% endif %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Blog</h1>
 <div class="ui two cards">
   {%for post in posts %}
