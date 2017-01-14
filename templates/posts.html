@@ -21,9 +21,10 @@
       </div>
     </div>
     <div class="content">
-      <span class="right floated">
-        <i class="heart outline like icon"></i>
-        {{post.likes}} likes
+      <span class="right floated like-button">
+        <i data-postid={{post.key().id()}} class="heart outline like icon"></i>
+        <span class="likes-text">{{post.likes}} likes</span>
+
       </span>
       <i class="comment icon"></i>
       3 comments
