@@ -10,7 +10,16 @@ from google.appengine.ext import db
 import datetime
 import json
 
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+from models.user import User
+
+#######################
+####### Cookies #########
+#######################
+
+SECRET = '8389c4927f7bbdbf7385da1072b7d01b3bd59be32a1e038b'
+
+
+template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                 autoescape = True)
 
@@ -33,7 +42,7 @@ class Handler(webapp2.RequestHandler):
 
 
     def set_secure_cookie(self, name, val):
-        cookie_val = make_secure_val(val)
+        cookie_val = self.make_secure_val(val)
         # set cookie on Path to make sure cookies don't get set on
         # different paths
         self.response.headers.add_header(
@@ -42,7 +51,7 @@ class Handler(webapp2.RequestHandler):
 
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
-        return cookie_val and check_secure_val(cookie_val)
+        return cookie_val and self.check_secure_val(cookie_val)
 
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
@@ -57,3 +66,14 @@ class Handler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
+
+    def check_secure_val(self, h):
+        val = h.split('|')[0]
+        if h == self.make_secure_val(val):
+            return val
+
+    def hash_str(self, s):
+        return hmac.new(SECRET, s).hexdigest()
+
+    def make_secure_val(self, s):
+        return "%s|%s" % (s, self.hash_str(s))

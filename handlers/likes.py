@@ -1,6 +1,3 @@
-##########################
-####### LIKES  ##########
-##########################
 import json
 
 from models.post import Post
