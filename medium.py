@@ -54,6 +54,9 @@ class CommentHandler(Handler):
               <div class="text">
                 %s
               </div>
+              <div class="actions">
+                <a class="reply">Delete</a>
+              </div>
             </div>
         </div>
 

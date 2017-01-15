@@ -30,4 +30,12 @@ $(function() {
       textArea.val("")
     });
   });
+
+  $('.ui.comments').on('click', 'a', function(event) {
+    event.preventDefault();
+    var deleteButton = $(this);
+    deleteButton.closest('.comment').remove()
+  })
+
+
 })
