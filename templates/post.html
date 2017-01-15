@@ -14,7 +14,7 @@
           <img src="https://robohash.org/{{comment.author}}">
         </a>
         <div class="content">
-          <a class="author">{{comment.author}}</a>
+          <h3 class="author">{{comment.author}}</h3>
           <div class="text">
             <p>{{comment.body}}</p>
           </div>
@@ -22,6 +22,7 @@
       </div>
     {% endfor %}
 </div>
+{% if user.username %}
 <form data-postid={{post.key().id()}} id="comment-form" class="ui reply form">
   <div class="field">
     <textarea></textarea>
@@ -30,4 +31,5 @@
     <i class="icon edit"></i> Add Comment
   </button>
 </form>
+{% endif %}
 {%endblock%}
