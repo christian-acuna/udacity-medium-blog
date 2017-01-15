@@ -3,21 +3,31 @@
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome {{username}}</h1>
 
 <h2>Posts</h2>
-<ul>
+<div class="ui list">
   {%for post in posts%}
-  <li>
-    <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
-  </li>
+
+  <div class="item">
+    <i class="file text icon"></i>
+    <div class="content">
+      <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
+    </div>
+  </div>
   {% endfor %}
-</ul>
+</div>
 
 <h2>Comments</h2>
-<ul>
+
+<div class="ui list">
   {%for comment in comments%}
-  <li>
-    <a href="blog/posts/{{comment.parent_key().id()}}" class="header">{{comment.body}}</a>
-  </li>
+
+  <div class="item">
+    <i class="comment icon"></i>
+    <div class="content">
+      <a href="blog/posts/{{comment.parent_key().id()}}" class="header">{{comment.parent().subject}}</a>
+      <div class="description">- {{comment.body}}</div>
+    </div>
+  </div>
   {% endfor %}
-</ul>
+</div>
 
 {%endblock%}
