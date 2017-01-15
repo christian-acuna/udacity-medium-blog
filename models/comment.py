@@ -9,7 +9,8 @@ class Comment(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
-def write_entity(cls,body,author, parent_key):
-    return cls(body = body,
-               author = author,
-               parent = parent_key)
+    @classmethod
+    def write_entity(cls, body, author, parent_key):
+        return cls(body = body,
+                   author = author,
+                   parent = parent_key)

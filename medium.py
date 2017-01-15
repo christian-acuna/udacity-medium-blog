@@ -2,6 +2,7 @@ import os
 import webapp2
 
 import re
+import json
 from google.appengine.ext import db
 
 
@@ -16,6 +17,7 @@ from handlers.post import PostHandler
 from handlers.login import LoginHandler
 from models.post import Post
 from models.user import User
+from models.comment import Comment
 
 
 # global render_str function that does not inherit from class Handler
@@ -33,10 +35,32 @@ class CommentHandler(Handler):
             if not body:
                 return # return nothing
             else:
-                comment = Comment.write_entity(body, author, parent.key)
+                comment = Comment.write_entity(body, author, parent)
                 comment.put()
-                self.write(json.dumps(({'comment': 'true'})))
+                comment_html = self.render_comment(comment)
+                self.write(json.dumps(({'comment': comment_html})))
 
+    def render_comment(self, comment):
+        """renders a comment for ajax response"""
+
+        comment = '''
+        <div class="comment">
+            <a class="avatar">
+              <img src="https://robohash.org/%s">
+            </a>
+            <div class="content">
+              <a class="author">%s</a>
+              <div class="text">
+                %s
+              </div>
+            </div>
+        </div>
+
+        ''' % (self.user.username, \
+               comment.author, \
+               comment.body)
+               
+        return comment
 #################################
 ####### EDIT POST HANDELR #######
 #################################

@@ -36,20 +36,20 @@
         <div class="date">2 days ago</div>
       </div>
       <div class="text">
-        I re-tweeted this.
+        Here is another tweet!!!
       </div>
       <div class="actions">
         <a class="reply">Reply</a>
       </div>
     </div>
   </div>
-  <form class="ui reply form">
-    <div class="field">
-      <textarea></textarea>
-    </div>
-    <div class="ui primary submit labeled icon button">
-      <i class="icon edit"></i> Add Comment
-    </div>
-  </form>
 </div>
+<form data-postid={{post.key().id()}} id="comment-form" class="ui reply form">
+  <div class="field">
+    <textarea></textarea>
+  </div>
+  <button type="submit" class="ui primary submit labeled icon button">
+    <i class="icon edit"></i> Add Comment
+  </button>
+</form>
 {%endblock%}
