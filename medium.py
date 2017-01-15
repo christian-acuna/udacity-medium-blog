@@ -2,245 +2,39 @@ import os
 import webapp2
 import random
 from string import letters
-import jinja2
 import re
-import hashlib
-import hmac
 from google.appengine.ext import db
-import datetime
-import json
 
-#######################
-####### Cookies #########
-#######################
 
-SECRET = '8389c4927f7bbdbf7385da1072b7d01b3bd59be32a1e038b'
-def hash_str(s):
-    return hmac.new(SECRET, s).hexdigest()
-
-def make_secure_val(s):
-    return "%s|%s" % (s, hash_str(s))
-
-def check_secure_val(h):
-    val = h.split('|')[0]
-    if h == make_secure_val(val):
-        return val
-
-################################
-####### Template Setup #########
-################################
-
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
-                                autoescape = True)
-
-# def blog_key(name = 'default'):
-#     return db.Key.from_path('blogs', name)
-
-#######################
-####### Post #########
-#######################
-#######################
-
-class Post(db.Model):
-    """Class for blog post"""
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    author = db.StringProperty(required = True)
-    likes = db.IntegerProperty()
-    likers = db.StringListProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
-
-#######################
-####### USER #########
-#######################
-
-# make a string of 5 letters
-def make_salt(length = 5):
-    return ''.join(random.choice(letters) for x in xrange(length))
-# makes a password hash. Takes a username and pw (with optinal param for salt)
-# return salt, hashed version of (name + pw + salt)
-# store this in the database
-def make_pw_hash(name, pw, salt = None):
-    if not salt:
-        salt = make_salt()
-    h = hashlib.sha256(name + pw + salt).hexdigest()
-    return "%s,%s" % (salt, h)
-
-# function to verify password
-# makes sure hash from database matches the new hash based on params
-def vald_pw(name, password, h):
-    salt = h.split(',')[0]
-    return h == make_pw_hash(name, password, salt)
-
-class User(db.Model):
-    username = db.StringProperty(required = True)
-    email = db.StringProperty()
-    password_hash = db.StringProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
-
-    @classmethod
-    #cls refers to the class User
-    def by_id(cls, uid):
-        return cls.get_by_id(uid)
-    # looks up a user by name
-    @classmethod
-    def by_username(cls, username):
-        user = cls.all().filter('username =', username).get()
-        return user
-    # creates the user, but does not actually store it
-    @classmethod
-    def register(cls, username, pw, email = None):
-        pw_hash = make_pw_hash(username, pw)
-        return cls(username = username,
-                    password_hash = pw_hash,
-                    email = email)
-
-    @classmethod
-    def login(cls, username, password):
-        # find user object by username
-        user = cls.by_username(username)
-        # if user exists and valid password
-        # return user
-        if user and vald_pw(username, password, user.password_hash):
-            return user
-
-#######################
-####### Handler #########
-#######################
+from handlers.likes import LikeHandler
+from handlers.handler import Handler
+from handlers.main import MainPage
+from handlers.home import HomeHandler
+from handlers.new_post import NewPost
+from handlers.logout import LogoutHandler
+from handlers.welcome import WelcomeHandler
+from handlers.post import PostHandler
+from handlers.login import LoginHandler
+from models.post import Post
 
 # global render_str function that does not inherit from class Handler
 
-def render_str(template, **params):
-    t = jinja_env.get_template(template)
-    return t.render(params)
-
-class Handler(webapp2.RequestHandler):
-    def write(self, *a, **kw):
-        self.response.out.write(*a, **kw)
-
-    def render_str(self, template, **params):
-        params['user'] = self.user
-        # calls global render_str with user as key in params so it is
-        # available in each template
-        return render_str(template, **params)
-
-    def render(self, template, **kw):
-        self.write(self.render_str(template, **kw))
-
-
-    def set_secure_cookie(self, name, val):
-        cookie_val = make_secure_val(val)
-        # set cookie on Path to make sure cookies don't get set on
-        # different paths
-        self.response.headers.add_header(
-        'Set-Cookie',
-        '%s=%s; Path=/' % (name, cookie_val))
-
-    def read_secure_cookie(self, name):
-        cookie_val = self.request.cookies.get(name)
-        return cookie_val and check_secure_val(cookie_val)
-
-    def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
-
-    # sets the cookie to nothing
-    def logout(self):
-        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-
-    #called by the app engine framework
-    # every request calls this function
-    def initialize(self, *a, **kw):
-        webapp2.RequestHandler.initialize(self, *a, **kw)
-        uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.by_id(int(uid))
-
-##########################
-####### HOME PAGE ########
-##########################
-
-class HomeHandler(Handler):
-    """Class that renders the root home page"""
-    def get(self):
-        self.render("home.html")
-
-###############################
-####### MAIN BLOG PAGE ########
-##############################
-
-class MainPage(Handler):
-    """Class that handles showing all the blog posts on the /blog route"""
-    def render_front(self, visits):
-        posts = Post.all().order('-created')
-
-        self.render("posts.html", posts = posts)
-
-    def get(self):
-        visits = 0
-        visits_cookie_val = self.request.cookies.get('visits')
-        if visits_cookie_val:
-            cookie_val = check_secure_val(visits_cookie_val)
-            if cookie_val:
-                visits = int(cookie_val)
-
-        visits += 1
-        new_cookie_val = make_secure_val(str(visits))
-        self.response.headers.add_header('Set-Cookie', 'visits=%s' % new_cookie_val)
-        self.render_front(visits)
-
-##########################
-####### NEW POST  ########
-##########################
-
-class NewPost(Handler):
-    """Class that is responsible for showing a new post form and creating a new post in  the database"""
-    def render_form(self, subject="", content="", error=""):
-        if self.user:
-            self.render("new_post.html", subject=subject, content=content, error=error)
-        else:
-            error = "Only logged in users can write a post. Please log in."
-            self.render("login.html", error = error)
-
-    def get(self):
-        self.render_form()
-
+class CommentHandler(Handler):
+    """Handler for creatin a new comment"""
     def post(self):
-        subject = self.request.get('subject')
-        content = self.request.get('content')
-        author = self.user.username
-        likes = 0
-
-        if subject and content:
-            post = Post(subject = subject, content = content, author = author, likes = likes)
-            post.put() #store in database
-            id = post.key().id()
-            self.redirect("/blog/posts/%s" % str(id) )
+        """Only signed in users can post a comment. AJAX is used to update comments in the view"""
+        if not self.user:
+            self.redirect('/login')
         else:
-            error = 'A post needs both a subject line and content'
-            self.render_form(subject=subject, content=content, error=error)
-
-#################################
-####### VIEW POST HANDELR #######
-#################################
-
-class PostHandler(Handler):
-    """Class that handels the rendering of a single post"""
-    def render_post(self, post_id):
-        key = db.Key.from_path('Post', int(post_id))
-        post = db.get(key)
-
-        if not post:
-            self.error(404)
-            return self.render("404.html")
-
-        # post = Post.get_by_id(int(post_id))
-
-        self.render("post.html", post = post)
-
-    def get(self, post_id):
-        self.render_post(post_id)
+            body = self.request.get('body')
+            parent = Post.get_by_id(int(self.request.get('parent')))
+            author = self.user.username
+            if not body:
+                return # return nothing
+            else:
+                comment = Comment.write_entity(body, author, parent.key)
+                comment.put()
+                self.write(json.dumps(({'comment': 'true'})))
 
 #################################
 ####### EDIT POST HANDELR #######
@@ -300,50 +94,11 @@ class DeletePostHandler(Handler):
             error = "You need to be logged in to delete a post!"
             return self.render('login.html', error = error)
 
-##########################
-####### LIKES  ##########
-##########################
-
-class LikesHandler(Handler):
-    """Class that is responsible for adding a like to a post"""
-    def post(self):
-        post_id = int(self.request.get('postID'))
-        post = Post.get_by_id(post_id)
-        # uid = self.user.key.id()
-        #
-        # if uid == post.author
-
-        post.likes = post.likes + 1
-        post.likers.append(self.user.username)
-
-        if self.user:
-            if self.user.username != post.author:
-                post.put()
-                self.write(json.dumps(({'likes': post.likes})))
-            else:
-                self.redirect("/blog")
-        else:
-            error = "You need to be logged in to like a post!"
-            return self.render('login.html', error = error)
-
-
 
 ##########################
 ####### USER AUTH ########
 ##########################
 
-
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-def valid_username(username):
-    return username and USER_RE.match(username)
-
-PASS_RE = re.compile(r"^.{3,20}$")
-def valid_password(password):
-    return password and PASS_RE.match(password)
-
-EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-def valid_email(email):
-    return not email or EMAIL_RE.match(email)
 
 class Signup(Handler):
     def get(self):
@@ -391,42 +146,7 @@ class RegisterHandler(Signup):
             self.login(user)
             self.redirect('welcome')
 
-##########################
-####### Welcome  ##########
-##########################
-class WelcomeHandler(Handler):
-    def get(self):
-        # self.user is set in initialize function in Handler
-        if self.user:
-            self.render('welcome.html', username = self.user.username)
-        else:
-            self.redirect('/signup')
 
-##########################
-####### Login  ##########
-##########################
-class LoginHandler(Handler):
-    def get(self):
-        self.render("login.html")
-
-    def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
-
-        user = User.login(username, password)
-
-        if user:
-            self.login(user)
-            self.redirect('/welcome')
-        else:
-            message = 'Invaild login. Please try again.'
-            self.render('login.html', error = message)
-
-class LogoutHandler(Handler):
-    def get(self):
-        # calls logout method located in Handler
-        self.logout()
-        self.redirect('/signup')
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
@@ -434,7 +154,8 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               (r'/blog/posts/(\d+)', PostHandler),
                               (r'/blog/posts/(\d+)/edit', EditPostHandler),
                               (r'/blog/posts/(\d+)/delete', DeletePostHandler),
-                               (r'/blog/posts/like', LikesHandler),
+                               (r'/blog/posts/like', LikeHandler),
+                               ('/comments', CommentHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),
