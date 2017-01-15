@@ -2,7 +2,7 @@
 {% block content %}
   <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">{{post.subject}}</h1>
   <p>{{post.content}}</p>
-  {% if user.username %}
+  {% if user.username and post.author_id == user.key().id() %}
     <a href="/blog/posts/{{post.key().id()}}/edit">Edit</a> |
     <a href="/blog/posts/{{post.key().id()}}/delete">Delete</a>
   {% endif %}
