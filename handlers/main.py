@@ -6,8 +6,16 @@ class MainPage(Handler):
     """Class that handles showing all the blog posts on the /blog route"""
     def render_front(self, visits):
         posts = Post.all().order('-created')
+        error = self.request.get('error')
+        message = self.request.get('msg')
 
-        self.render("posts.html", posts = posts)
+        if error == '1':
+            error = "You can only delete your own posts."
+
+        if message == '1':
+            message = "Your post has been successfully deleted"
+            
+        self.render("posts.html", posts = posts, message = message, error = error)
 
     def get(self):
         visits = 0

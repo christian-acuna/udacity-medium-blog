@@ -7,6 +7,15 @@
     </div>
   </div>
 {% endif %}
+
+{% if error %}
+<div class="ui negative message">
+  <div class="header">
+    {{error}}
+  </div>
+</div>
+
+{% endif %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Blog</h1>
 <div class="ui two cards">
   {%for post in posts %}
@@ -15,7 +24,7 @@
       <img class="ui avatar image" src="https://robohash.org/{{post.author}}">{{post.author}}
     </div>
     <div class="content">
-      <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
+      <a href="/blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
       <div class="description">
         <p>{{post.content}}</p>
       </div>
