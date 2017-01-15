@@ -17,10 +17,12 @@ class NewPost(Handler):
         subject = self.request.get('subject')
         content = self.request.get('content')
         author = self.user.username
+        author_id = self.user.key().id()
         likes = 0
 
         if subject and content:
-            post = Post(subject = subject, content = content, author = author, likes = likes)
+            post = Post(subject = subject, content = content, author = author,
+                        likes = likes, author_id = author_id)
             post.put() #store in database
             id = post.key().id()
             self.redirect("/blog/posts/%s" % str(id) )

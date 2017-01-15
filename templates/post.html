@@ -8,31 +8,19 @@
   {% endif %}
   <h2>Comments</h2>
   <div class="ui comments">
-  <div class="comment">
-    <a class="avatar">
-      <img src="https://robohash.org/joe">
-    </a>
-    <div class="content">
-      <a class="author">Joe Henderson</a>
-      <div class="metadata">
-        <div class="date">1 day ago</div>
-      </div>
-      <div class="text">
-        <p>The hours, minutes and seconds stand as visible reminders that your effort put them all there. </p>
-        <p>Preserve until your next run, when the watch lets you see how Impermanent your efforts are.</p>
-      </div>
-      <div class="actions">
-        <a class="reply">Reply</a>
-      </div>
-    </div>
-  </div>
-  <ul>
     {% for comment in comments %}
-    <li>
-      {{comment.body}}
-    </li>
+      <div class="comment">
+        <a class="avatar">
+          <img src="https://robohash.org/{{comment.author}}">
+        </a>
+        <div class="content">
+          <a class="author">{{comment.author}}</a>
+          <div class="text">
+            <p>{{comment.body}}</p>
+          </div>
+        </div>
+      </div>
     {% endfor %}
-  </ul>
 </div>
 <form data-postid={{post.key().id()}} id="comment-form" class="ui reply form">
   <div class="field">

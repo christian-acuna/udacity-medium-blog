@@ -14,4 +14,9 @@ indexes:
   ancestor: yes
   properties:
   - name: created
+
+- kind: Comment
+  ancestor: yes
+  properties:
+  - name: created
     direction: desc

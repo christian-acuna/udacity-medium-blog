@@ -1,4 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome {{username}}</h1>
+
+<h2>Posts</h2>
+<ul>
+  {%for post in posts%}
+  <li>
+    <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
+  </li>
+  {% endfor %}
+</ul>
+
+<h2>Comments</h2>
+
 {%endblock%}
