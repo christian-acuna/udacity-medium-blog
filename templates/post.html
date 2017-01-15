@@ -26,23 +26,13 @@
       </div>
     </div>
   </div>
-  <div class="comment">
-    <a class="avatar">
-      <img src="https://robohash.org/christian">
-    </a>
-    <div class="content">
-      <a class="author">Christian Rocha</a>
-      <div class="metadata">
-        <div class="date">2 days ago</div>
-      </div>
-      <div class="text">
-        Here is another tweet!!!
-      </div>
-      <div class="actions">
-        <a class="reply">Reply</a>
-      </div>
-    </div>
-  </div>
+  <ul>
+    {% for comment in comments %}
+    <li>
+      {{comment.body}}
+    </li>
+    {% endfor %}
+  </ul>
 </div>
 <form data-postid={{post.key().id()}} id="comment-form" class="ui reply form">
   <div class="field">
