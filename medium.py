@@ -19,6 +19,22 @@ from models.post import Post
 
 # global render_str function that does not inherit from class Handler
 
+class CommentHandler(Handler):
+    """Handler for creatin a new comment"""
+    def post(self):
+        """Only signed in users can post a comment. AJAX is used to update comments in the view"""
+        if not self.user:
+            self.redirect('/login')
+        else:
+            body = self.request.get('body')
+            parent = Post.get_by_id(int(self.request.get('parent')))
+            author = self.user.username
+            if not body:
+                return # return nothing
+            else:
+                comment = Comment.write_entity(body, author, parent.key)
+                comment.put()
+                self.write(json.dumps(({'comment': 'true'})))
 
 #################################
 ####### EDIT POST HANDELR #######
@@ -139,6 +155,7 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               (r'/blog/posts/(\d+)/edit', EditPostHandler),
                               (r'/blog/posts/(\d+)/delete', DeletePostHandler),
                                (r'/blog/posts/like', LikeHandler),
+                               ('/comments', CommentHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),
                               ('/logout', LogoutHandler),
