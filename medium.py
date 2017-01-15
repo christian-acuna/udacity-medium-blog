@@ -1,7 +1,6 @@
 import os
 import webapp2
-import random
-from string import letters
+
 import re
 from google.appengine.ext import db
 
@@ -16,6 +15,8 @@ from handlers.welcome import WelcomeHandler
 from handlers.post import PostHandler
 from handlers.login import LoginHandler
 from models.post import Post
+from models.user import User
+
 
 # global render_str function that does not inherit from class Handler
 
@@ -112,14 +113,14 @@ class Signup(Handler):
         self.email = self.request.get('email')
         params = dict(username = self.username, email = self.email)
 
-        if not valid_username(self.username):
+        if not User.valid_username(self.username):
             params['error_username'] = "That's not a valid username"
             have_error = True
-        if not valid_password(self.password):
+        if not User.valid_password(self.password):
             params['error_verify'] = "Your passwords didn't match."
             have_error = True
 
-        if not valid_email(self.email):
+        if not User.valid_email(self.email):
             params['error_email'] = "That's not a valid email"
             have_error = True
 
