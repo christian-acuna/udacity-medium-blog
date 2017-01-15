@@ -1,4 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 style="margin-top: 40px;"class="ui stacked segment center aligned header">Welcome {{username}}</h1>
+
+<h2>Posts</h2>
+<div class="ui list">
+  {%for post in posts%}
+
+  <div class="item">
+    <i class="file text icon"></i>
+    <div class="content">
+      <a href="blog/posts/{{post.key().id()}}" class="header">{{post.subject}}</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Comments</h2>
+
+<div class="ui list">
+  {%for comment in comments%}
+
+  <div class="item">
+    <i class="comment icon"></i>
+    <div class="content">
+      <a href="blog/posts/{{comment.parent_key().id()}}" class="header">{{comment.parent().subject}}</a>
+      <div class="description">- {{comment.body}}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
 {%endblock%}

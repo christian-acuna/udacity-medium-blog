@@ -13,8 +13,8 @@ class PostHandler(Handler):
             return self.render("404.html")
 
         # post = Post.get_by_id(int(post_id))
-
-        self.render("post.html", post = post)
+        comments = post.get_comments()
+        self.render("post.html", post = post, comments = comments)
 
     def get(self, post_id):
         self.render_post(post_id)

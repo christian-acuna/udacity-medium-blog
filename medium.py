@@ -1,8 +1,8 @@
 import os
 import webapp2
-import random
-from string import letters
+
 import re
+import json
 from google.appengine.ext import db
 
 
@@ -16,6 +16,9 @@ from handlers.welcome import WelcomeHandler
 from handlers.post import PostHandler
 from handlers.login import LoginHandler
 from models.post import Post
+from models.user import User
+from models.comment import Comment
+
 
 # global render_str function that does not inherit from class Handler
 
@@ -29,13 +32,36 @@ class CommentHandler(Handler):
             body = self.request.get('body')
             parent = Post.get_by_id(int(self.request.get('parent')))
             author = self.user.username
+            author_id = self.user.key().id()
             if not body:
                 return # return nothing
             else:
-                comment = Comment.write_entity(body, author, parent.key)
+                comment = Comment.write_entity(body, author, parent, author_id)
                 comment.put()
-                self.write(json.dumps(({'comment': 'true'})))
+                comment_html = self.render_comment(comment)
+                self.write(json.dumps(({'comment': comment_html})))
 
+    def render_comment(self, comment):
+        """renders a comment for ajax response"""
+
+        comment = '''
+        <div class="comment">
+            <a class="avatar">
+              <img src="https://robohash.org/%s">
+            </a>
+            <div class="content">
+              <a class="author">%s</a>
+              <div class="text">
+                %s
+              </div>
+            </div>
+        </div>
+
+        ''' % (self.user.username, \
+               comment.author, \
+               comment.body)
+
+        return comment
 #################################
 ####### EDIT POST HANDELR #######
 #################################
@@ -112,14 +138,14 @@ class Signup(Handler):
         self.email = self.request.get('email')
         params = dict(username = self.username, email = self.email)
 
-        if not valid_username(self.username):
+        if not User.valid_username(self.username):
             params['error_username'] = "That's not a valid username"
             have_error = True
-        if not valid_password(self.password):
+        if not User.valid_password(self.password):
             params['error_verify'] = "Your passwords didn't match."
             have_error = True
 
-        if not valid_email(self.email):
+        if not User.valid_email(self.email):
             params['error_email'] = "That's not a valid email"
             have_error = True
 
