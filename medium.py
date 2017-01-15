@@ -32,10 +32,11 @@ class CommentHandler(Handler):
             body = self.request.get('body')
             parent = Post.get_by_id(int(self.request.get('parent')))
             author = self.user.username
+            author_id = self.user.key().id()
             if not body:
                 return # return nothing
             else:
-                comment = Comment.write_entity(body, author, parent)
+                comment = Comment.write_entity(body, author, parent, author_id)
                 comment.put()
                 comment_html = self.render_comment(comment)
                 self.write(json.dumps(({'comment': comment_html})))
@@ -59,7 +60,7 @@ class CommentHandler(Handler):
         ''' % (self.user.username, \
                comment.author, \
                comment.body)
-               
+
         return comment
 #################################
 ####### EDIT POST HANDELR #######

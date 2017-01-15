@@ -12,5 +12,12 @@
 </ul>
 
 <h2>Comments</h2>
+<ul>
+  {%for comment in comments%}
+  <li>
+    <a href="blog/posts/{{comment.parent_key().id()}}" class="header">{{comment.body}}</a>
+  </li>
+  {% endfor %}
+</ul>
 
 {%endblock%}
