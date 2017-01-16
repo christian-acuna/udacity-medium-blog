@@ -40,7 +40,7 @@ $(function() {
     });
   });
 
-  $('.ui.comments').on('click', 'a', function(event) {
+  $('.ui.comments').on('click', 'a.reply', function(event) {
     event.preventDefault();
     var deleteButton = $(this);
     deleteButton.closest('.comment').remove()

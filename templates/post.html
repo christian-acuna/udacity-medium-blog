@@ -18,7 +18,7 @@
           <div class="text">
             <p>{{comment.body}}</p>
           </div>
-          {% if user.key().id() == comment.author_id %}
+          {% if user and user.key().id() == comment.author_id %}
             <div class="actions">
               <a class="reply">Delete</a>
             </div>
