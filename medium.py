@@ -153,15 +153,25 @@ class Signup(Handler):
         if not User.valid_username(self.username):
             params['error_username'] = "That's not a valid username"
             have_error = True
+
         if not User.valid_password(self.password):
-            params['error_verify'] = "Your passwords didn't match."
+            params['error_password_valid'] = "Password is not valid"
+            have_error = True
+        elif self.password != self.password_confirmation:
+            params['error_pw_match'] = "Passwords do not match"
             have_error = True
 
         if not User.valid_email(self.email):
             params['error_email'] = "That's not a valid email"
             have_error = True
 
+        if User.by_username(self.username):
+            params['error_user_exits'] = 'That user aleady exists.'
+            have_error = True
+
         if have_error:
+            print params
+            params['error'] = True
             self.render("register.html", **params)
         else:
             self.done()
@@ -171,18 +181,13 @@ class Signup(Handler):
 
 class RegisterHandler(Signup):
     def done(self):
-        user = User.by_username(self.username)
         # check to see if user is in db
-        if user:
-            message = 'That user aleady exists.'
-            self.render('register.html', error_username = message)
-        else:
-            # if user dosen't exist, register user and store in db
-            user = User.register(self.username, self.password, self.email)
-            user.put()
-            # login function sets cookie
-            self.login(user)
-            self.redirect('welcome')
+        # if user dosen't exist, register user and store in db
+        user = User.register(self.username, self.password, self.email)
+        user.put()
+        # login function sets cookie
+        self.login(user)
+        self.redirect('welcome')
 
 
 
