@@ -1,7 +1,7 @@
 Medium Blog
 -----------
 
-This is a multi user blog project written in Python 2.7 for Google App Engine
+This is a multi-user blog project written in Python 2.7 using Google App Engine
 
 You can view it live here: [medium-blog.appspot.com/blog](medium-blog.appspot.com/blog)
 

@@ -20,8 +20,6 @@ from models.user import User
 from models.comment import Comment
 
 
-# global render_str function that does not inherit from class Handler
-
 class CommentHandler(Handler):
     """Handler for creatin a new comment"""
     def post(self):
@@ -36,8 +34,10 @@ class CommentHandler(Handler):
             if not body:
                 return # return nothing
             else:
+                # call class method write_entity to create comment instance
                 comment = Comment.write_entity(body, author, parent, author_id)
                 comment.put()
+                # render HTML for response
                 comment_html = self.render_comment(comment)
                 self.write(json.dumps(({'comment': comment_html})))
 
@@ -85,6 +85,7 @@ class DeleteCommentHandler(Handler):
             else:
                 error = "There was an error deleting the comment."
                 self.write(json.dumps(({'error': error})))
+
 #################################
 ####### EDIT POST HANDELR #######
 #################################
@@ -100,14 +101,14 @@ class EditPostHandler(Handler):
             return self.render("404.html")
 
         if self.user.key().id() == post.author_id:
-            self.render("edit_post.html", post = post, subject = post.subject, content = post.content)
+            self.render("posts/edit_post.html", post = post, subject = post.subject, content = post.content)
         elif self.user:
             message = "You can only edit your own posts."
             posts = Post.all().order('-created')
-            self.render('posts.html', posts=posts, message = message )
+            self.render('posts/posts.html', posts=posts, message = message )
         else:
             error = "You need to be logged in to edit a post!"
-            return self.render('login.html', error = error)
+            return self.render('sessions/login.html', error = error)
 
     def post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
@@ -128,10 +129,10 @@ class EditPostHandler(Handler):
         elif self.user:
             message = "You can only edit your own posts."
             posts = Post.all().order('-created')
-            self.render('posts.html', posts=posts, message = message )
+            self.render('posts/posts.html', posts=posts, message = message )
         else:
             error = "You need to be logged in to edit a post!"
-            return self.render('login.html', error = error)
+            return self.render('sessions/login.html', error = error)
 
 #################################
 ####### EDIT POST HANDELR #######
@@ -150,7 +151,7 @@ class DeletePostHandler(Handler):
             self.redirect('/blog?error=1')
         else:
             error = "You need to be logged in to delete a post!"
-            return self.render('login.html', error = error)
+            return self.render('sessions/login.html', error = error)
 
 
 ##########################
@@ -160,7 +161,7 @@ class DeletePostHandler(Handler):
 
 class Signup(Handler):
     def get(self):
-        self.render("register.html")
+        self.render("sessions/register.html")
 
     def post(self):
         have_error = False
@@ -192,7 +193,7 @@ class Signup(Handler):
         if have_error:
             print params
             params['error'] = True
-            self.render("register.html", **params)
+            self.render("sessions/register.html", **params)
         else:
             self.done()
 

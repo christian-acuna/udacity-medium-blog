@@ -4,7 +4,7 @@ from handlers.handler import Handler
 
 class LoginHandler(Handler):
     def get(self):
-        self.render("login.html")
+        self.render("sessions/login.html")
 
     def post(self):
         username = self.request.get('username')
@@ -17,4 +17,4 @@ class LoginHandler(Handler):
             self.redirect('/welcome')
         else:
             message = 'Invaild login. Please try again.'
-            self.render('login.html', error = message)
+            self.render('sessions/login.html', error = message)
