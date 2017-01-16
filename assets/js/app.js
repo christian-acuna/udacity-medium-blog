@@ -9,9 +9,21 @@ $(function() {
     console.log(path);
     $.post(path, {"postID": postId}, function(data, textStatus, xhr) {
       var response = JSON.parse(data)
-      icon.removeClass('outline')
-      icon.addClass('red')
-      icon.siblings()[0].innerHTML = response.likes + ' likes'
+      console.log(response);
+      if (response['error']) {
+        console.log(response['error']);
+        errorHTML = '<div class="ui negative message"><div class="header">' + response['error'] + '</div></div>'
+        $('.ui.main.text.container').prepend(errorHTML)
+        $('.ui.negative.message').fadeOut(4000)
+      } else if (response.addLikes >= 0) {
+        icon.removeClass('outline')
+        icon.addClass('red')
+        icon.siblings()[0].innerHTML = response.addLikes + ' likes'
+      } else if (response.removeLikes >= 0) {
+        icon.removeClass('red')
+        icon.addClass('outline')
+        icon.siblings()[0].innerHTML = response.removeLikes + ' likes'
+      }
     });
   });
 
