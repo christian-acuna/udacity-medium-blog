@@ -1,17 +1,14 @@
 $(function() {
-  console.log('hello');
   $( ".like-button" ).on( "click", "i", function( event ) {
     event.preventDefault();
     var icon = $( this );
     var postId = icon.attr('data-postid');
     console.log(postId);
     var path = '/blog/posts/like'
-    console.log(path);
     $.post(path, {"postID": postId}, function(data, textStatus, xhr) {
       var response = JSON.parse(data)
       console.log(response);
       if (response['error']) {
-        console.log(response['error']);
         errorHTML = '<div class="ui negative message"><div class="header">' + response['error'] + '</div></div>'
         $('.ui.main.text.container').prepend(errorHTML)
         $('.ui.negative.message').fadeOut(4000)
@@ -48,6 +45,4 @@ $(function() {
     var deleteButton = $(this);
     deleteButton.closest('.comment').remove()
   })
-
-
 })

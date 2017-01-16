@@ -50,7 +50,7 @@ class CommentHandler(Handler):
               <img src="https://robohash.org/%s">
             </a>
             <div class="content">
-              <a class="author">%s</a>
+              <h3 class="author">%s</h3>
               <div class="text">
                 %s
               </div>
