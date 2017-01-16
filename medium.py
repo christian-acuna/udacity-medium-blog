@@ -10,11 +10,18 @@ from handlers.likes import LikeHandler
 from handlers.handler import Handler
 from handlers.main import MainPage
 from handlers.home import HomeHandler
-from handlers.new_post import NewPost
-from handlers.logout import LogoutHandler
+
+# handlers/posts
+from handlers.posts.new_post import NewPost
+from handlers.posts.post import PostHandler
+
+# handlers/sessions
+from handlers.sessions.login import LoginHandler
+from handlers.sessions.logout import LogoutHandler
+
 from handlers.welcome import WelcomeHandler
-from handlers.post import PostHandler
-from handlers.login import LoginHandler
+
+# models
 from models.post import Post
 from models.user import User
 from models.comment import Comment
