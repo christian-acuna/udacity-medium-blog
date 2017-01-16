@@ -5,10 +5,10 @@ class NewPost(Handler):
     """Class that is responsible for showing a new post form and creating a new post in  the database"""
     def render_form(self, subject="", content="", error=""):
         if self.user:
-            self.render("new_post.html", subject=subject, content=content, error=error)
+            self.render("posts/new_post.html", subject=subject, content=content, error=error)
         else:
             error = "Only logged in users can write a post. Please log in."
-            self.render("login.html", error = error)
+            self.render("sessions/login.html", error = error)
 
     def get(self):
         self.render_form()

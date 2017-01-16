@@ -14,8 +14,8 @@ class MainPage(Handler):
 
         if message == '1':
             message = "Your post has been successfully deleted"
-            
-        self.render("posts.html", posts = posts, message = message, error = error)
+
+        self.render("posts/posts.html", posts = posts, message = message, error = error)
 
     def get(self):
         visits = 0

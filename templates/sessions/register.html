@@ -17,6 +17,13 @@
 
 <div id="top" class="ui middle aligned center aligned grid top">
   <div class="column">
+    {% if error %}
+      <div class="ui error message">
+        <div class="header">
+          There was an error with your registration.
+        </div>
+      </div>
+    {% endif %}
     <h2 class="ui teal image header">
       <div class="content">
         Register for Christian Acuña's blog
@@ -26,6 +33,16 @@
       <div class="ui stacked segment">
 
         <div class="field">
+          {% if error_user_exits %}
+            <div class="ui pointing below red basic label">
+              {{error_user_exits}}
+            </div>
+          {% endif %}
+          {% if error_username %}
+            <div class="ui pointing below red basic label">
+              {{error_username}}
+            </div>
+          {% endif %}
           <div class="ui left icon input">
             <i class="user icon"></i>
             <input required type="text" name="username" placeholder="Username" value="{{username}}">
@@ -33,17 +50,32 @@
         </div>
 
         <div class="field">
+          {% if error_pw_match %}
+            <div class="ui pointing below red basic label">
+              {{error_pw_match}}
+            </div>
+          {% endif %}
+          {% if error_password_valid %}
+            <div class="ui pointing below red basic label">
+              {{error_password_valid}}
+            </div>
+          {% endif %}
           <div class="ui left icon input">
             <i class="lock icon"></i>
             <input required type="password" name="password" placeholder="Password">
           </div>
         </div>
-
         <div class="field">
+          {% if error_email %}
+            <div class="ui pointing below red basic label">
+              {{error_email}}
+            </div>
+          {% endif %}
           <div class="ui left icon input">
             <i class="lock icon"></i>
             <input required type="password" name="password_confirmation" placeholder="Password confirmation">
           </div>
+
         </div>
 
         <div class="field">
@@ -60,18 +92,6 @@
     <div class="ui message">
       Already a user? <a href="/login">Log in!</a>
     </div>
-
-    {% if error %}
-      <div class="ui error message">
-        <div class="header">
-          There was some errors with your submission
-        </div>
-        <ul class="list">
-          <li>{{error}}</li>
-        </ul>
-      </div>
-    {% endif %}
-
   </div>
 </div>
 {%endblock%}

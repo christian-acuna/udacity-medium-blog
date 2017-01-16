@@ -14,7 +14,7 @@ class PostHandler(Handler):
 
         # post = Post.get_by_id(int(post_id))
         comments = post.get_comments()
-        self.render("post.html", post = post, comments = comments)
+        self.render("posts/post.html", post = post, comments = comments)
 
     def get(self, post_id):
         self.render_post(post_id)

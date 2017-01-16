@@ -1,11 +1,13 @@
-from google.appengine.ext import db
+"""Module for User class model"""
 import re
 import hashlib
 import hmac
 import random
+from google.appengine.ext import db
 from string import letters
 
 class User(db.Model):
+    """class for User model"""
     username = db.StringProperty(required = True)
     email = db.StringProperty()
     password_hash = db.StringProperty(required = True)
@@ -17,10 +19,12 @@ class User(db.Model):
     def by_id(cls, uid):
         return cls.get_by_id(uid)
     # looks up a user by name
+
     @classmethod
     def by_username(cls, username):
         user = cls.all().filter('username =', username).get()
         return user
+
     # creates the user, but does not actually store it
     @classmethod
     def register(cls, username, pw, email = None):
@@ -42,6 +46,7 @@ class User(db.Model):
     @classmethod
     def make_salt(cls, length = 5):
         return ''.join(random.choice(letters) for x in xrange(length))
+
     # makes a password hash. Takes a username and pw (with optinal param for salt)
     # return salt, hashed version of (name + pw + salt)
     # store this in the database
