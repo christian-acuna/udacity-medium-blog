@@ -30,5 +30,5 @@ class LikeHandler(Handler):
                 self.write(json.dumps(({'addLikes': post.likes})))
                 post.put()
         else:
-            error = "You need to be logged in to like a post!"
-            return self.render('login.html', error = error)
+            error = 'You need to be logged in to like a post! Please <a href="/login">Log in</a>.'
+            self.write(json.dumps(({'error': error})))
