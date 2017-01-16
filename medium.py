@@ -5,11 +5,11 @@ import re
 import json
 from google.appengine.ext import db
 
-
-from handlers.likes import LikeHandler
+# handlers
 from handlers.handler import Handler
 from handlers.main import MainPage
 from handlers.home import HomeHandler
+from handlers.likes import LikeHandler
 
 # handlers/posts
 from handlers.posts.new_post import NewPost
@@ -19,6 +19,9 @@ from handlers.posts.post import PostHandler
 from handlers.sessions.login import LoginHandler
 from handlers.sessions.logout import LogoutHandler
 
+# handlers/comments
+from handlers.comments.new_comment import CommentHandler
+
 from handlers.welcome import WelcomeHandler
 
 # models
@@ -27,52 +30,7 @@ from models.user import User
 from models.comment import Comment
 
 
-class CommentHandler(Handler):
-    """Handler for creatin a new comment"""
-    def post(self):
-        """Only signed in users can post a comment. AJAX is used to update comments in the view"""
-        if not self.user:
-            self.redirect('/login')
-        else:
-            body = self.request.get('body')
-            parent = Post.get_by_id(int(self.request.get('parent')))
-            author = self.user.username
-            author_id = self.user.key().id()
-            if not body:
-                return # return nothing
-            else:
-                # call class method write_entity to create comment instance
-                comment = Comment.write_entity(body, author, parent, author_id)
-                comment.put()
-                # render HTML for response
-                comment_html = self.render_comment(comment)
-                self.write(json.dumps(({'comment': comment_html})))
 
-    def render_comment(self, comment):
-        """renders a comment for ajax response"""
-
-        comment = '''
-        <div  data-commentId="%s"class="comment">
-            <a class="avatar">
-              <img src="https://robohash.org/%s">
-            </a>
-            <div class="content">
-              <h3 class="author">%s</h3>
-              <div class="text">
-                %s
-              </div>
-              <div class="actions">
-                <a class="reply">Delete</a>
-              </div>
-            </div>
-        </div>
-
-        ''' % (comment.key().id(), \
-               self.user.username, \
-               comment.author, \
-               comment.body)
-
-        return comment
 
 class DeleteCommentHandler(Handler):
     """Class that deletes a comment via AJAX"""
