@@ -32,7 +32,7 @@ $(function() {
     var parent = commentForm.attr('data-postid');
     var textArea = commentForm.find('textarea')
     var body = textArea.val()
-    data = {"parent": parent, "body": body}
+    var data = {"parent": parent, "body": body}
     $.post('/comments', data, function(data, textStatus, xhr) {
       var comment_response = JSON.parse(data)
       commentForm.siblings().last().append(comment_response["comment"])
@@ -43,6 +43,19 @@ $(function() {
   $('.ui.comments').on('click', 'a.reply', function(event) {
     event.preventDefault();
     var deleteButton = $(this);
-    deleteButton.closest('.comment').remove()
+    var comment = deleteButton.closest('.comment')
+    var commentId = comment.attr('data-commentId')
+    var postId = $('form[data-postid]').attr('data-postid')
+    var data = {"commentId": commentId, "postId": postId}
+    $.post('/comments/delete', data, function(data, textStatus, xhr) {
+      console.log(data);
+      var comment_response = JSON.parse(data)
+      console.log(comment_response.comment, commentId);
+      if (comment_response.comment === parseInt(commentId)) {
+        deleteButton.closest('.comment').remove()
+      } else if (comment_response.error) {
+          console.log(comment_response.error);
+      }
+    });
   })
 })

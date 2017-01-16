@@ -9,7 +9,7 @@
   <h2>Comments</h2>
   <div class="ui comments">
     {% for comment in comments %}
-      <div class="comment">
+      <div data-commentId="{{comment.key().id()}}" class="comment">
         <a class="avatar">
           <img src="https://robohash.org/{{comment.author}}">
         </a>
