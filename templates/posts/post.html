@@ -20,7 +20,8 @@
           </div>
           {% if user and user.key().id() == comment.author_id %}
             <div class="actions">
-              <a class="reply">Delete</a>
+              <a class="delete">Delete</a>
+              <a class="edit">Edit</a>
             </div>
           {% endif %}
         </div>

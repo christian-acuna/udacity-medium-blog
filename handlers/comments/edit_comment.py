@@ -5,29 +5,27 @@ from handlers.handler import Handler
 from google.appengine.ext import db
 import json
 
-class CommentHandler(Handler):
-    """Handler for creatin a new comment"""
+class DeleteCommentHandler(Handler):
+    """Class that deletes a comment via AJAX"""
     def post(self):
-        """Only signed in users can post a comment. AJAX is used to update comments in the view"""
         if not self.user:
             self.redirect('/login')
         else:
-            body = self.request.get('body')
-            parent = Post.get_by_id(int(self.request.get('parent')))
-            author = self.user.username
-            author_id = self.user.key().id()
-            if not body:
-                return # return nothing
+            comment_id = self.request.get('commentId')
+            post_id = self.request.get('postId')
+            parent_key = Post.get_by_id(int(post_id))
+            comment = Comment.get_by_id(int(comment_id), parent_key)
+            print comment
+
+            if self.user and self.user.key().id() == comment.author_id:
+                self.write(json.dumps(({'comment': comment.key().id()})))
+                comment.delete()
             else:
-                # call class method write_entity to create comment instance
-                comment = Comment.write_entity(body, author, parent, author_id)
-                comment.put()
-                # render HTML for response
-                comment_html = self.render_comment(comment)
-                self.write(json.dumps(({'comment': comment_html})))
+                error = "There was an error deleting the comment."
+                self.write(json.dumps(({'error': error})))
 
     def render_comment(self, comment):
-        """renders a comment for ajax response"""
+        """renders edit form comment for ajax response"""
 
         comment = '''
         <div  data-commentId="%s"class="comment">
