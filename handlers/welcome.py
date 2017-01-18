@@ -3,7 +3,9 @@ from google.appengine.ext import db
 from models.post import Post
 from models.comment import Comment
 
+
 class WelcomeHandler(Handler):
+
     def get(self):
         message = self.request.get('msg')
         if message == '1':
@@ -14,9 +16,9 @@ class WelcomeHandler(Handler):
             posts = q_posts.filter('author_id =', self.user.key().id())
             q_comments = db.Query(Comment)
             comments = q_comments.filter('author_id =', self.user.key().id())
-            self.render('welcome.html', username = self.user.username,
-                                        posts = posts,
-                                        comments = comments,
-                                        message = message)
+            self.render('welcome.html', username=self.user.username,
+                        posts=posts,
+                        comments=comments,
+                        message=message)
         else:
             self.redirect('/signup')

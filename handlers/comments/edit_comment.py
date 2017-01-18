@@ -5,8 +5,10 @@ from handlers.handler import Handler
 from google.appengine.ext import db
 import json
 
+
 class EditCommentHandler(Handler):
     """Class that edits a comment via AJAX"""
+
     def post(self):
         if not self.user:
             self.redirect('/login')

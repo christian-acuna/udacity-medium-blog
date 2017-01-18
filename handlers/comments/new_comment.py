@@ -5,10 +5,13 @@ from handlers.handler import Handler
 from google.appengine.ext import db
 import json
 
+
 class CommentHandler(Handler):
     """Handler for creatin a new comment"""
+
     def post(self):
-        """Only signed in users can post a comment. AJAX is used to update comments in the view"""
+        """Only signed in users can post a comment. AJAX is used to update
+        comments in the view"""
         if not self.user:
             self.redirect('/login')
         else:
@@ -17,7 +20,7 @@ class CommentHandler(Handler):
             author = self.user.username
             author_id = self.user.key().id()
             if not body:
-                return # return nothing
+                return  # return nothing
             else:
                 # call class method write_entity to create comment instance
                 comment = Comment.write_entity(body, author, parent, author_id)
@@ -46,9 +49,9 @@ class CommentHandler(Handler):
             </div>
         </div>
 
-        ''' % (comment.key().id(), \
-               self.user.username, \
-               comment.author, \
+        ''' % (comment.key().id(),
+               self.user.username,
+               comment.author,
                comment.body)
 
         return comment

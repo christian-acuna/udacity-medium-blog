@@ -31,16 +31,16 @@ from handlers.comments.edit_comment import EditCommentHandler
 from handlers.welcome import WelcomeHandler
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
-                              ('/blog/?', MainPage),
-                              ('/blog/posts/new', NewPost),
-                              (r'/blog/posts/(\d+)', PostHandler),
-                              (r'/blog/posts/(\d+)/edit', EditPostHandler),
-                              (r'/blog/posts/(\d+)/delete', DeletePostHandler),
+                               ('/blog/?', MainPage),
+                               ('/blog/posts/new', NewPost),
+                               (r'/blog/posts/(\d+)', PostHandler),
+                               (r'/blog/posts/(\d+)/edit', EditPostHandler),
+                               (r'/blog/posts/(\d+)/delete', DeletePostHandler),
                                (r'/blog/posts/like', LikeHandler),
                                ('/comments', CommentHandler),
-                                ('/comments/edit', EditCommentHandler),
+                               ('/comments/edit', EditCommentHandler),
                                ('/comments/delete', DeleteCommentHandler),
-                              ('/login', LoginHandler),
-                              ('/signup', RegisterHandler),
-                              ('/logout', LogoutHandler),
-                              ('/welcome', WelcomeHandler)], debug=True)
+                               ('/login', LoginHandler),
+                               ('/signup', RegisterHandler),
+                               ('/logout', LogoutHandler),
+                               ('/welcome', WelcomeHandler)], debug=True)

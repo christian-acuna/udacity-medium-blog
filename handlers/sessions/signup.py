@@ -2,7 +2,9 @@ from models.user import User
 from handlers.handler import Handler
 from google.appengine.ext import db
 
+
 class Signup(Handler):
+
     def get(self):
         self.render("sessions/register.html")
 
@@ -12,7 +14,7 @@ class Signup(Handler):
         self.password = self.request.get('password')
         self.password_confirmation = self.request.get('password_confirmation')
         self.email = self.request.get('email')
-        params = dict(username = self.username, email = self.email)
+        params = dict(username=self.username, email=self.email)
 
         if not User.valid_username(self.username):
             params['error_username'] = "That's not a valid username"

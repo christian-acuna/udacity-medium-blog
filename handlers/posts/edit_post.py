@@ -2,8 +2,10 @@ from models.post import Post
 from handlers.handler import Handler
 from google.appengine.ext import db
 
+
 class EditPostHandler(Handler):
     """Class that handles the editing of a single post"""
+
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
@@ -12,14 +14,15 @@ class EditPostHandler(Handler):
             return self.redirect('/blog?error=2')
 
         if self.user.key().id() == post.author_id:
-            self.render("posts/edit_post.html", post = post, subject = post.subject, content = post.content)
+            self.render("posts/edit_post.html", post=post,
+                        subject=post.subject, content=post.content)
         elif self.user:
             message = "You can only edit your own posts."
             posts = Post.all().order('-created')
-            self.render('posts/posts.html', posts=posts, message = message )
+            self.render('posts/posts.html', posts=posts, message=message)
         else:
             error = "You need to be logged in to edit a post!"
-            return self.render('sessions/login.html', error = error)
+            return self.render('sessions/login.html', error=error)
 
     def post(self, post_id):
         key = db.Key.from_path('Post', int(post_id))
@@ -32,7 +35,7 @@ class EditPostHandler(Handler):
             if subject and content:
                 post.subject = subject
                 post.content = content
-                post.put() #store in database
+                post.put()  # store in database
                 self.redirect("/blog/posts/%s" % str(post.key().id()))
             else:
                 error = 'A post needs both a subject line and content'
@@ -40,7 +43,7 @@ class EditPostHandler(Handler):
         elif self.user:
             message = "You can only edit your own posts."
             posts = Post.all().order('-created')
-            self.render('posts/posts.html', posts=posts, message = message )
+            self.render('posts/posts.html', posts=posts, message=message)
         else:
             error = "You need to be logged in to edit a post!"
-            return self.render('sessions/login.html', error = error)
+            return self.render('sessions/login.html', error=error)

@@ -3,6 +3,7 @@ from handlers.handler import Handler
 
 
 class LoginHandler(Handler):
+
     def get(self):
         self.render("sessions/login.html")
 
@@ -17,4 +18,4 @@ class LoginHandler(Handler):
             self.redirect('/welcome')
         else:
             message = 'Invaild login. Please try again.'
-            self.render('sessions/login.html', error = message)
+            self.render('sessions/login.html', error=message)
