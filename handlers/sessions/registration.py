@@ -1,7 +1,9 @@
 from handlers.sessions.signup import Signup
 from models.user import User
 
+
 class RegisterHandler(Signup):
+
     def done(self):
         # check to see if user is in db
         # if user dosen't exist, register user and store in db
