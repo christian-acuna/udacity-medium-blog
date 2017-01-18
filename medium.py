@@ -26,15 +26,9 @@ from handlers.sessions.registration import RegisterHandler
 # handlers/comments
 from handlers.comments.new_comment import CommentHandler
 from handlers.comments.delete_comment import DeleteCommentHandler
+from handlers.comments.edit_comment import EditCommentHandler
 
 from handlers.welcome import WelcomeHandler
-
-# models
-from models.post import Post
-from models.user import User
-from models.comment import Comment
-
-
 
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
@@ -44,6 +38,7 @@ app = webapp2.WSGIApplication([('/', HomeHandler),
                               (r'/blog/posts/(\d+)/delete', DeletePostHandler),
                                (r'/blog/posts/like', LikeHandler),
                                ('/comments', CommentHandler),
+                                ('/comments/edit', EditCommentHandler),
                                ('/comments/delete', DeleteCommentHandler),
                               ('/login', LoginHandler),
                               ('/signup', RegisterHandler),

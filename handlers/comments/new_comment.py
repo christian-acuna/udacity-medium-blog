@@ -37,10 +37,11 @@ class CommentHandler(Handler):
             <div class="content">
               <h3 class="author">%s</h3>
               <div class="text">
-                %s
+                <p>%s</p>
               </div>
               <div class="actions">
-                <a class="reply">Delete</a>
+                <a class="delete">Delete</a>
+                <a class="edit">Edit</a>
               </div>
             </div>
         </div>

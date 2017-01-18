@@ -40,7 +40,7 @@ $(function() {
     });
   });
 
-  $('.ui.comments').on('click', 'a.reply', function(event) {
+  $('.ui.comments').on('click', 'a.delete', function(event) {
     event.preventDefault();
     var deleteButton = $(this);
     var comment = deleteButton.closest('.comment')
@@ -57,5 +57,57 @@ $(function() {
           console.log(comment_response.error);
       }
     });
+  })
+
+  $('.ui.comments').on('click', 'a.edit', function(event) {
+    event.preventDefault();
+    var editButton = $(this);
+    var comment = editButton.closest('.comment')
+    var commentText = comment.find('.text>p')
+    var text = commentText[0].innerHTML;
+
+    var commentFrom = '<div class="ui form"><div class="field"><label>Edit Comment</label><textarea rows="2">'+ text + '</textarea></div></div>'
+    // comment.append(commentFrom)
+    comment.find('.text').append(commentFrom)
+    comment.find('.text>p').remove()
+    editButton.hide()
+    var saveButton = '<a class="save">Save</a>'
+    editButton.parent().append(saveButton)
+  })
+
+  $('.ui.comments').on('click', 'a.save', function(event) {
+    event.preventDefault();
+
+    var saveButton = $(this);
+    var comment = saveButton.closest('.comment')
+    var commentId = comment.attr('data-commentId')
+    var postId = $('form[data-postid]').attr('data-postid')
+    var data = {"commentId": commentId, "postId": postId}
+    var commentText = saveButton.closest('textarea')
+
+    var editCommentTextDiv = saveButton.parent().siblings('.text')[0]
+    var textArea = $(editCommentTextDiv).find('textarea')[0]
+    var TextAreaUpdatedComment = $(textArea).val()
+
+    var data = {"commentId": commentId, "postId": postId, commentText: TextAreaUpdatedComment }
+    console.log(commentId, postId, TextAreaUpdatedComment);
+
+    $.post('/comments/edit', data, function(data, textStatus, xhr) {
+
+      var editCommentResponse = JSON.parse(data)
+      console.log(editCommentResponse.comment, commentId);
+      if (editCommentResponse.comment === parseInt(commentId)) {
+        var editButton = $('a.edit');
+        editButton.show()
+        saveButton.remove()
+        var newPar = '<p>'+ TextAreaUpdatedComment + '</p>'
+        var textDiv = comment.find('.text')
+        textDiv.empty().append(newPar)
+      } else if (comment_response.error) {
+          console.log(comment_response.error);
+      }
+
+    });
+
   })
 })

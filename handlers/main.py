@@ -11,6 +11,8 @@ class MainPage(Handler):
 
         if error == '1':
             error = "You can only delete your own posts."
+        elif error == '2':
+            error = "No post found that matches that post identifier."
 
         if message == '1':
             message = "Your post has been successfully deleted"

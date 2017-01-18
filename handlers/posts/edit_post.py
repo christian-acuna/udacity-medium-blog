@@ -9,8 +9,7 @@ class EditPostHandler(Handler):
         post = db.get(key)
 
         if not post:
-            self.error(404)
-            return self.render("404.html")
+            return self.redirect('/blog?error=2')
 
         if self.user.key().id() == post.author_id:
             self.render("posts/edit_post.html", post = post, subject = post.subject, content = post.content)
