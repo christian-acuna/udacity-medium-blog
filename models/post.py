@@ -3,16 +3,17 @@ from google.appengine.ext import db
 
 from models.comment import Comment
 
+
 class Post(db.Model):
     """Class for blog post"""
-    subject = db.StringProperty(required = True)
-    content = db.TextProperty(required = True)
-    author = db.StringProperty(required = True)
+    subject = db.StringProperty(required=True)
+    content = db.TextProperty(required=True)
+    author = db.StringProperty(required=True)
     likes = db.IntegerProperty()
     liked_by = db.StringListProperty()
     author_id = db.IntegerProperty()
-    created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now = True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
 
     # @property
     def get_comments(self):
