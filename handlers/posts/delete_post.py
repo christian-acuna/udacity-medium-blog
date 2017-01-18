@@ -8,7 +8,11 @@ class DeletePostHandler(Handler):
         key = db.Key.from_path('Post', int(post_id))
         post = db.get(key)
 
+        if not post:
+            return self.redirect('/blog?error=2')
+
         if self.user and self.user.key().id() == post.author_id:
+            db.delete(post.get_comments())
             post.delete()
             self.redirect('/welcome?msg=1')
         elif self.user:

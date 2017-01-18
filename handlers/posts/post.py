@@ -9,10 +9,8 @@ class PostHandler(Handler):
         post = db.get(key)
 
         if not post:
-            self.error(404)
-            return self.render("404.html")
+            return self.redirect("/blog?error=2")
 
-        # post = Post.get_by_id(int(post_id))
         comments = post.get_comments()
         self.render("posts/post.html", post = post, comments = comments)
 

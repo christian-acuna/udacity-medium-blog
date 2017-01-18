@@ -29,13 +29,6 @@ from handlers.comments.delete_comment import DeleteCommentHandler
 
 from handlers.welcome import WelcomeHandler
 
-# models
-from models.post import Post
-from models.user import User
-from models.comment import Comment
-
-
-
 app = webapp2.WSGIApplication([('/', HomeHandler),
                               ('/blog/?', MainPage),
                               ('/blog/posts/new', NewPost),

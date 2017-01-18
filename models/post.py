@@ -14,6 +14,7 @@ class Post(db.Model):
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
+    # @property
     def get_comments(self):
         """function to display all comments for each post"""
         q = db.Query(Comment)
