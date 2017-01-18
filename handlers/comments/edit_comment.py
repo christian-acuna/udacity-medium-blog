@@ -5,48 +5,23 @@ from handlers.handler import Handler
 from google.appengine.ext import db
 import json
 
-class DeleteCommentHandler(Handler):
-    """Class that deletes a comment via AJAX"""
+class EditCommentHandler(Handler):
+    """Class that edits a comment via AJAX"""
     def post(self):
         if not self.user:
             self.redirect('/login')
         else:
             comment_id = self.request.get('commentId')
             post_id = self.request.get('postId')
+            comment_text = self.request.get('commentText')
             parent_key = Post.get_by_id(int(post_id))
             comment = Comment.get_by_id(int(comment_id), parent_key)
-            print comment
 
-            if self.user and self.user.key().id() == comment.author_id:
+            if comment and self.user and self.user.key().id() == comment.author_id:
+                comment.body = comment_text
+                comment.put()
+
                 self.write(json.dumps(({'comment': comment.key().id()})))
-                comment.delete()
             else:
-                error = "There was an error deleting the comment."
+                error = "There was an editing the comment."
                 self.write(json.dumps(({'error': error})))
-
-    def render_comment(self, comment):
-        """renders edit form comment for ajax response"""
-
-        comment = '''
-        <div  data-commentId="%s"class="comment">
-            <a class="avatar">
-              <img src="https://robohash.org/%s">
-            </a>
-            <div class="content">
-              <h3 class="author">%s</h3>
-              <div class="text">
-                %s
-              </div>
-              <div class="actions">
-                <a class="delete">Delete</a>
-                <a class="edit">Edit</a>
-              </div>
-            </div>
-        </div>
-
-        ''' % (comment.key().id(), \
-               self.user.username, \
-               comment.author, \
-               comment.body)
-
-        return comment
